@@ -409,7 +409,7 @@ export function generateAnalyticsDataset(
   }
 
   const speedDistribution = buildSpeedDistribution(active);
-  const timeOfDayMatrix = buildTimeOfDayMatrix(segments);
+  const timeOfDayMatrix = buildTimeOfDayMatrix(active);
   const segmentComparisons = buildSegmentComparisons(active);
 
   return {

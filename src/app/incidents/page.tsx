@@ -97,6 +97,7 @@ export default function IncidentsPage() {
   }, [incidents, searchQuery, statusFilter, severityFilter]);
 
   const selected = incidents.find((i) => i.id === selectedIncidentId) ?? null;
+  const selectedIncident = selected;
 
   const handleCreate = React.useCallback(
     async (input: CreateIncidentInput) => {
@@ -273,7 +274,7 @@ export default function IncidentsPage() {
         <Panel variant="strong" className="overflow-hidden">
           <PanelHeader
             title="Incident map"
-            description="Active and in-progress incidents on the METR-LA corridor network"
+            description="Active and in-progress incidents on the METR-LA corridor network · click a segment to select its most severe open incident"
             icon={MapIcon}
           />
           <div className="h-[560px] w-full p-2">
@@ -283,11 +284,40 @@ export default function IncidentsPage() {
               <TrafficMap
                 segments={segments}
                 incidents={filtered}
-                selectedSegmentId={selectedIncidentId}
-                onSelectSegment={() => undefined}
+                selectedSegmentId={
+                  segments.find(
+                    (segment) => segment.id === selectedIncident?.segmentId
+                  )?.id ?? null
+                }
+                onSelectSegment={(segmentId) => {
+                  if (!segmentId) {
+                    setSelectedIncidentId(null);
+                    return;
+                  }
+                  const match = filtered.find(
+                    (incident) => incident.segmentId === segmentId && incident.status !== "resolved"
+                  );
+                  setSelectedIncidentId(match?.id ?? null);
+                }}
               />
             )}
           </div>
+          {selectedIncident ? (
+            <div className="border-t border-white/[0.06] px-4 py-3">
+              <p className="text-[12px] font-medium text-slate-200">{selectedIncident.title}</p>
+              <p className="mt-0.5 text-[11px] text-slate-500">
+                {selectedIncident.id} · {selectedIncident.highway} ·{" "}
+                {getStatusBadgeStyles(selectedIncident.status).label} ·{" "}
+                {getSeverityBadgeStyles(selectedIncident.severity).label} severity
+              </p>
+            </div>
+          ) : (
+            <div className="border-t border-white/[0.06] px-4 py-3">
+              <p className="text-[11px] text-slate-500">
+                No incident selected. Click an incident marker or a road segment on the map.
+              </p>
+            </div>
+          )}
         </Panel>
       ) : (
         <div

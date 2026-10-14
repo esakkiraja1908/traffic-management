@@ -236,7 +236,9 @@ export default function AnalyticsPage() {
           <Panel className="overflow-hidden">
             <PanelHeader
               title="Congestion by time of day"
-              description="Corridor x period congestion matrix"
+              description={`Corridor x period congestion matrix · ${
+                corridorFilter === "all" ? "all monitored corridors" : corridorFilter
+              }`}
               icon={Clock3}
               action={
                 <CustomBadge
