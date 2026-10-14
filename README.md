@@ -100,7 +100,7 @@ src/
 │   └── globals.css              # Design tokens + Leaflet theming
 ├── components/
 │   ├── layout/                  # AppShell, Sidebar, Topbar
-│   ├── map/                     # Leaflet canvas, schematic fallback, legend
+│   ├── map/                     # map-config (Leaflet-free), Leaflet canvas, fallback, legend
 │   ├── charts/                  # Recharts wrappers + custom heatmaps
 │   ├── traffic/                 # Segment table, detail panel, incident UI
 │   ├── ui/                      # Panel, Badge, Button, Modal, states, controls

@@ -15,6 +15,7 @@ export interface TrafficDataState {
   incidents: TrafficIncident[];
   snapshot: TrafficObservationSnapshot | null;
   loading: boolean;
+  refreshing: boolean;
   error: string | null;
   notice: string | null;
   dataSource: "simulation" | "live_backend";
@@ -27,17 +28,23 @@ export function useTrafficData(): TrafficDataState {
   const [incidents, setIncidents] = React.useState<TrafficIncident[]>([]);
   const [snapshot, setSnapshot] = React.useState<TrafficObservationSnapshot | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [refreshing, setRefreshing] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [notice, setNotice] = React.useState<string | null>(null);
   const [dataSource, setDataSource] = React.useState<"simulation" | "live_backend">("simulation");
   const [nonce, setNonce] = React.useState(0);
+  const hasLoadedRef = React.useRef(false);
 
   React.useEffect(() => {
     if (!hydrated) return;
     let cancelled = false;
 
     async function load() {
-      setLoading(true);
+      if (hasLoadedRef.current) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
       setError(null);
       try {
         const [segmentsResult, incidentsResult, observationsResult] = await Promise.all([
@@ -60,7 +67,11 @@ export function useTrafficData(): TrafficDataState {
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : "Failed to load traffic data");
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          hasLoadedRef.current = true;
+          setLoading(false);
+          setRefreshing(false);
+        }
       }
     }
 
@@ -72,11 +83,21 @@ export function useTrafficData(): TrafficDataState {
 
   const refresh = React.useCallback(() => setNonce((n) => n + 1), []);
 
+  // Background auto-refresh driven by the configured interval in Settings.
+  React.useEffect(() => {
+    if (!hydrated) return;
+    const intervalSec = settings.refreshIntervalSec;
+    if (!intervalSec || intervalSec <= 0) return;
+    const timer = window.setInterval(() => setNonce((n) => n + 1), intervalSec * 1000);
+    return () => window.clearInterval(timer);
+  }, [hydrated, settings.refreshIntervalSec]);
+
   return {
     segments,
     incidents,
     snapshot,
     loading,
+    refreshing,
     error,
     notice,
     dataSource,

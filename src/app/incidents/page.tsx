@@ -68,7 +68,7 @@ const SEVERITY_FILTERS: { value: SeverityFilter; label: string }[] = [
 const STATUS_FLOW: IncidentStatus[] = ["active", "responding", "clearing", "resolved"];
 
 export default function IncidentsPage() {
-  const { segments, incidents, loading, error, dataSource, refresh } = useTrafficData();
+  const { segments, incidents, loading, refreshing, error, dataSource, refresh } = useTrafficData();
   const { pushToast } = useToast();
 
   const [viewMode, setViewMode] = React.useState<ViewMode>("split");
@@ -184,8 +184,11 @@ export default function IncidentsPage() {
               { value: "map", label: "Map", icon: MapIcon },
             ]}
           />
-          <Button variant="secondary" onClick={refresh} disabled={loading}>
-            <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} aria-hidden="true" />
+          <Button variant="secondary" onClick={refresh} disabled={loading || refreshing}>
+            <RefreshCw
+              className={cn("h-3.5 w-3.5", (loading || refreshing) && "animate-spin")}
+              aria-hidden="true"
+            />
             Refresh
           </Button>
           <Button variant="secondary" onClick={handleReset}>

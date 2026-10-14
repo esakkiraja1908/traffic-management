@@ -22,7 +22,7 @@ import { NoticeBanner } from "@/components/ui/notice-banner";
 import { ErrorState, EmptyState } from "@/components/ui/states";
 import { DataSourceBadge } from "@/components/ui/data-source-badge";
 import { TrafficMap } from "@/components/map/traffic-map";
-import type { TileProviderKey } from "@/components/map/traffic-map-canvas";
+import type { TileProviderKey } from "@/components/map/map-config";
 import { SegmentDetailPanel } from "@/components/traffic/segment-detail-panel";
 import { SegmentTable } from "@/components/traffic/segment-table";
 import { useTrafficData } from "@/hooks/use-traffic-data";
@@ -50,7 +50,8 @@ const CONGESTION_FILTERS: { value: CongestionFilter; label: string }[] = [
 ];
 
 export default function LiveTrafficPage() {
-  const { segments, incidents, loading, error, notice, dataSource, refresh } = useTrafficData();
+  const { segments, incidents, loading, refreshing, error, notice, dataSource, refresh } =
+    useTrafficData();
   const { settings, updateSettings } = useSettings();
 
   const [selectedSegmentId, setSelectedSegmentId] = React.useState<string | null>(null);
@@ -90,6 +91,12 @@ export default function LiveTrafficPage() {
     return base;
   }, [segments]);
 
+  // Segments at or below the operator-configured severe threshold.
+  const belowSevereThreshold = React.useMemo(
+    () => segments.filter((segment) => segment.currentSpeedMph <= settings.severeCongestionThresholdMph),
+    [segments, settings.severeCongestionThresholdMph]
+  );
+
   const resetMap = React.useCallback(() => {
     setSelectedSegmentId(null);
     setSearchQuery("");
@@ -119,8 +126,11 @@ export default function LiveTrafficPage() {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="secondary" onClick={refresh} disabled={loading}>
-            <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} aria-hidden="true" />
+          <Button variant="secondary" onClick={refresh} disabled={loading || refreshing}>
+            <RefreshCw
+              className={cn("h-3.5 w-3.5", (loading || refreshing) && "animate-spin")}
+              aria-hidden="true"
+            />
             Refresh
           </Button>
           <Button variant="secondary" onClick={resetMap}>
@@ -277,6 +287,20 @@ export default function LiveTrafficPage() {
                         </div>
                       );
                     })}
+                  </div>
+                  <div className="mt-2 flex items-center justify-between border-t border-white/[0.06] pt-2">
+                    <span className="text-[10px] text-slate-500">
+                      ≤ {settings.severeCongestionThresholdMph} mph threshold
+                    </span>
+                    <span
+                      className={cn(
+                        "font-mono text-[10.5px] font-medium",
+                        belowSevereThreshold.length ? "text-rose-400" : "text-emerald-400"
+                      )}
+                      title={`${belowSevereThreshold.length} segment(s) at or below your configured severe threshold. Adjust it in Settings.`}
+                    >
+                      {belowSevereThreshold.length} flagged
+                    </span>
                   </div>
                 </div>
               </div>

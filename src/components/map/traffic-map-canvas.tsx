@@ -10,35 +10,16 @@ import {
   useMap,
   useMapEvents,
 } from "react-leaflet";
-import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { RoadSegment, TrafficIncident } from "@/types/traffic";
 import { getCongestionColorHex, cn } from "@/lib/utils";
 import { OfflineFallback } from "@/components/ui/states";
 import { SchematicTrafficMap } from "@/components/map/schematic-traffic-map";
+import { LA_MAP_BOUNDS, LA_MAP_CENTER, TILE_PROVIDERS } from "@/components/map/map-config";
+import type { TileProviderKey } from "@/components/map/map-config";
 
-export const LA_MAP_CENTER: [number, number] = [34.0522, -118.3535];
-export const LA_MAP_BOUNDS: L.LatLngBoundsExpression = [
-  [33.7, -118.75],
-  [34.42, -117.95],
-];
-
-export const TILE_PROVIDERS = {
-  dark_matter: {
-    url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    label: "CARTO Dark Matter",
-  },
-  osm_standard: {
-    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    label: "OpenStreetMap Standard",
-  },
-} as const;
-
-export type TileProviderKey = keyof typeof TILE_PROVIDERS;
+export { LA_MAP_BOUNDS, LA_MAP_CENTER, TILE_PROVIDERS };
+export type { TileProviderKey };
 
 interface TrafficMapCanvasProps {
   segments: RoadSegment[];

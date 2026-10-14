@@ -4,8 +4,8 @@ import * as React from "react";
 import dynamic from "next/dynamic";
 import { LocateFixed, Minus, Plus, RotateCcw } from "lucide-react";
 import type { RoadSegment, TrafficIncident } from "@/types/traffic";
-import type { TileProviderKey } from "@/components/map/traffic-map-canvas";
-import { LA_MAP_CENTER } from "@/components/map/traffic-map-canvas";
+import type { TileProviderKey } from "@/components/map/map-config";
+import { LA_MAP_CENTER } from "@/components/map/map-config";
 import { MapLegend } from "@/components/map/map-legend";
 import { cn } from "@/lib/utils";
 

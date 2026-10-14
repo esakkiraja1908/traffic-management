@@ -32,7 +32,7 @@ import { getCongestionBadgeStyles, cn } from "@/lib/utils";
 import type { RoadSegment } from "@/types/traffic";
 
 export default function OverviewPage() {
-  const { segments, incidents, snapshot, loading, error, notice, dataSource, refresh } =
+  const { segments, incidents, snapshot, loading, refreshing, error, notice, dataSource, refresh } =
     useTrafficData();
   const [selectedSegmentId, setSelectedSegmentId] = React.useState<string | null>(null);
 
@@ -56,15 +56,23 @@ export default function OverviewPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <DataSourceBadge mode={dataSource} />
-          <span className="text-[11px] text-slate-500">
+          <span className="flex items-center gap-1.5 text-[11px] text-slate-500">
+            {refreshing ? (
+              <span className="h-2.5 w-2.5 animate-spin rounded-full border border-cyan-500/30 border-t-cyan-400" />
+            ) : null}
             {loading
               ? "Loading network snapshot…"
-              : `Last refreshed ${new Date().toLocaleTimeString()}`}
+              : refreshing
+                ? "Refreshing network snapshot…"
+                : `Last refreshed ${new Date().toLocaleTimeString()}`}
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="secondary" onClick={refresh} disabled={loading}>
-            <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} aria-hidden="true" />
+          <Button variant="secondary" onClick={refresh} disabled={loading || refreshing}>
+            <RefreshCw
+              className={cn("h-3.5 w-3.5", (loading || refreshing) && "animate-spin")}
+              aria-hidden="true"
+            />
             Refresh
           </Button>
           <Link href="/live-traffic">
